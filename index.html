@@ -5,12 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cargando...</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding-top: 100px; background: #fafafa; color: #333; margin: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding-top: 80px; background: #fafafa; color: #333; margin: 0; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #e6683c; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .expired-box { background: #fff; padding: 40px 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h1 { color: #e74c3c; font-size: 24px; margin-bottom: 10px; }
         p { font-size: 16px; color: #666; line-height: 1.5; }
+        .info-card {
+            background: #fff;
+            padding: 25px 20px;
+            border-radius: 12px;
+            max-width: 350px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        .business-title { font-size: 20px; font-weight: bold; color: #111; margin-bottom: 15px; }
+        .stat-box { background: #fff5f0; border-radius: 8px; padding: 10px; margin: 10px 0; }
+        .stat-number { font-size: 22px; font-weight: bold; color: #e6683c; }
+        .stat-label { font-size: 12px; color: #777; text-transform: uppercase; }
+        .last-date { font-size: 12px; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -29,7 +43,6 @@
                 return;
             }
 
-            // PEGA AQUÍ ABAJO TU URL DE APPS SCRIPT (la que termina en /exec)
             const scriptURL = 'https://script.google.com/macros/s/AKfycbyzE_tOTbQBcrLYy3casw4xeaAgL4z9POGjiMtLE1zwNcy9oSB11BlbjbRaTce5sLg/exec?id=' + id;
 
             try {
@@ -37,7 +50,24 @@
                 const data = await response.json();
 
                 if (data.success && data.url) {
-                    window.location.replace(data.url);
+                    // Mostrar los datos en pantalla antes de redirigir
+                    document.getElementById('content').innerHTML = `
+                        <div class="info-card">
+                            <div class="business-title">${data.establecimiento || '¡Bienvenido!'}</div>
+                            <div class="stat-box">
+                                <div class="stat-number">⚡ ${data.totalEscaneos}</div>
+                                <div class="stat-label">Total de veces usada</div>
+                            </div>
+                            <div class="last-date">Último uso: ${data.ultimoEscaneo || 'Hace un momento'}</div>
+                            <div class="loader" style="width: 25px; height: 25px; border-width: 3px; margin-top: 15px;"></div>
+                            <p style="font-size: 13px; margin: 5px 0 0 0;">Redirigiendo...</p>
+                        </div>`;
+
+                    // Esperar 2 segundos para que el establecimiento/cliente alcance a ver la estadística
+                    setTimeout(() => {
+                        window.location.replace(data.url);
+                    }, 2000);
+
                 } else if (data.expired) {
                     document.getElementById('content').innerHTML = `
                         <div class="expired-box">
